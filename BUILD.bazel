@@ -2,26 +2,26 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
 
-# Bazel build for clickhouse-cpp. The canonical build is CMake
+# Bazel build for datastore-cpp. The canonical build is CMake
 # (top-level CMakeLists.txt); this file mirrors the same library as
 # a bzlmod target so downstream Bazel projects can depend on it via
 # the Bazel Central Registry without standing up CMake.
 #
 # Differences from the CMake build that callers should be aware of:
 #   * TLS links against BoringSSL (`@boringssl`) by default; pass
-#     `--@clickhouse-cpp-client//:tls=openssl` to use the BCR OpenSSL module
-#     instead, or `--@clickhouse-cpp-client//:tls=no` to disable TLS
+#     `--@datastore-cpp-client//:tls=openssl` to use the BCR OpenSSL module
+#     instead, or `--@datastore-cpp-client//:tls=no` to disable TLS
 #     entirely. `USE_BORINGSSL` ifdef-guards the two OpenSSL-only
 #     surfaces (`SSL_CONF_*` command API and `SSL_read_ex`) that
-#     BoringSSL doesn't provide; see clickhouse/base/sslsocket.cpp.
+#     BoringSSL doesn't provide; see datastore/base/sslsocket.cpp.
 #   * lz4 / zstd / abseil come from BCR modules instead of contrib/.
 #     cityhash is the exception: it is built from contrib/ because the
-#     wire protocol needs ClickHouse's frozen CityHash variant, which
+#     wire protocol needs Datastore's frozen CityHash variant, which
 #     differs from the stock BCR module (see the :cityhash target).
 
-# Selects the TLS implementation: `--@clickhouse-cpp-client//:tls=boringssl`
-# (default), `--@clickhouse-cpp-client//:tls=openssl`, or
-# `--@clickhouse-cpp-client//:tls=no` to disable TLS entirely (matching
+# Selects the TLS implementation: `--@datastore-cpp-client//:tls=boringssl`
+# (default), `--@datastore-cpp-client//:tls=openssl`, or
+# `--@datastore-cpp-client//:tls=no` to disable TLS entirely (matching
 # CMake's `WITH_OPENSSL=OFF` default). The two TLS libraries come from
 # BCR modules and are linked statically, keeping the build hermetic.
 string_flag(
@@ -61,8 +61,8 @@ selects.config_setting_group(
 )
 
 # Vendored CityHash from contrib/, NOT the BCR `@cityhash` module.
-# ClickHouse's wire protocol checksums compressed blocks with a specific
-# frozen CityHash128 variant (see clickhouse/base/compressed.cpp); the
+# Datastore's wire protocol checksums compressed blocks with a specific
+# frozen CityHash128 variant (see datastore/base/compressed.cpp); the
 # stock Google CityHash 1.0.2 that BCR packages produces *different*
 # hashes, so a server rejects compressed blocks with "Checksum doesn't
 # match: corrupted data". This is the exact copy the CMake build uses,
@@ -88,29 +88,29 @@ cc_library(
     strip_include_prefix = "contrib/cityhash/cityhash",
 )
 
-# The main clickhouse-cpp library. Downstream callers use
-# `#include <clickhouse/client.h>` and link `@clickhouse-cpp-client//:clickhouse`.
+# The main datastore-cpp library. Downstream callers use
+# `#include <datastore/client.h>` and link `@datastore-cpp-client//:datastore`.
 cc_library(
-    name = "clickhouse",
+    name = "datastore",
     srcs = glob(
         [
-            "clickhouse/*.cpp",
-            "clickhouse/base/*.cpp",
-            "clickhouse/columns/*.cpp",
-            "clickhouse/types/*.cpp",
+            "datastore/*.cpp",
+            "datastore/base/*.cpp",
+            "datastore/columns/*.cpp",
+            "datastore/types/*.cpp",
         ],
         # Only compiled when TLS is enabled, mirroring CMake's
         # `IF (WITH_OPENSSL)` source-list append.
-        exclude = ["clickhouse/base/sslsocket.cpp"],
+        exclude = ["datastore/base/sslsocket.cpp"],
     ) + select({
         ":tls_no": [],
-        "//conditions:default": ["clickhouse/base/sslsocket.cpp"],
+        "//conditions:default": ["datastore/base/sslsocket.cpp"],
     }),
     hdrs = glob([
-        "clickhouse/*.h",
-        "clickhouse/base/*.h",
-        "clickhouse/columns/*.h",
-        "clickhouse/types/*.h",
+        "datastore/*.h",
+        "datastore/base/*.h",
+        "datastore/columns/*.h",
+        "datastore/types/*.h",
     ]),
     defines = select({
         # `WITH_OPENSSL` enables the TLS code paths in client.cpp /
@@ -143,8 +143,8 @@ cc_library(
         "//conditions:default": [],
     }),
     # Expose headers at their workspace path so both internal
-    # (`#include "client.h"` from clickhouse/*.cpp via quote-form
-    # source-dir search) and external (`#include <clickhouse/client.h>`)
+    # (`#include "client.h"` from datastore/*.cpp via quote-form
+    # source-dir search) and external (`#include <datastore/client.h>`)
     # include forms resolve.
     strip_include_prefix = "/",
     visibility = ["//visibility:public"],

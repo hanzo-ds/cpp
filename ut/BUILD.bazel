@@ -4,7 +4,7 @@ load("@rules_cc//cc:cc_test.bzl", "cc_test")
 #
 #   //ut:unit_tests  — hermetic; no external server. Runs in the sandbox
 #                      under `bazel test`, part of every CI matrix job.
-#   //ut:e2e_tests   — needs a live ClickHouse server on $CLICKHOUSE_HOST
+#   //ut:e2e_tests   — needs a live Datastore server on $DATASTORE_HOST
 #                      (default localhost:9000). Tagged `manual`, so it is
 #                      excluded from `bazel test //...` and must be run
 #                      explicitly: `bazel run //ut:e2e_tests` (or
@@ -12,9 +12,10 @@ load("@rules_cc//cc:cc_test.bzl", "cc_test")
 #                      docker-compose first, mirroring the CMake build's
 #                      Linux workflow.
 #
-# ssl_ut.cpp is in neither target yet: it connects to an external secure
-# endpoint (play.clickhouse.com:9440) with OS-specific CA paths, which the
-# local docker server doesn't provide. It stays CMake-only for now.
+# ssl_ut.cpp is in neither target yet: it connects to a secure endpoint given
+# by $DATASTORE_SECURE_HOST / $DATASTORE_SECURE2_HOST with OS-specific CA paths,
+# which the local docker server doesn't provide. Those suites skip themselves
+# when the variables are unset. It stays CMake-only for now.
 
 # Compile flags shared by both test binaries. -I. lets tests include
 # support headers via the angled `#include <ut/utils.h>` form; /bigobj
@@ -25,7 +26,7 @@ _UT_COPTS = ["-I."] + select({
 })
 
 _UT_DEPS = [
-    "//:clickhouse",
+    "//:datastore",
     "@abseil-cpp//absl/numeric:int128",
     "@googletest//:gtest",
 ]
@@ -67,10 +68,10 @@ cc_test(
     deps = _UT_DEPS,
 )
 
-# Server-dependent end-to-end tests. These connect to a ClickHouse
-# instance ($CLICKHOUSE_HOST / _PORT / _USER / _PASSWORD / _DB, defaulting
+# Server-dependent end-to-end tests. These connect to a Datastore
+# instance ($DATASTORE_HOST / _PORT / _USER / _PASSWORD / _DB, defaulting
 # to localhost:9000) and exercise the full client round-trip — the same
-# set the CMake build links into clickhouse-cpp-ut and runs against the
+# set the CMake build links into datastore-cpp-ut and runs against the
 # docker-compose server.
 #
 # Tagged `manual` + `external`: excluded from wildcard expansion (so a bare
@@ -78,7 +79,7 @@ cc_test(
 # cached (results depend on live server state). Run it with:
 #
 #   bazel run //ut:e2e_tests
-#   CLICKHOUSE_HOST=my-host bazel test //ut:e2e_tests --test_output=all
+#   DATASTORE_HOST=my-host bazel test //ut:e2e_tests --test_output=all
 cc_test(
     name = "e2e_tests",
     size = "large",

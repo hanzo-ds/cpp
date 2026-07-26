@@ -1,4 +1,4 @@
-SET ( clickhouse-cpp-ut-src
+SET ( datastore-cpp-ut-src
     main.cpp
 
     block_ut.cpp
@@ -29,19 +29,19 @@ SET ( clickhouse-cpp-ut-src
 )
 
 IF (WITH_OPENSSL)
-    LIST (APPEND clickhouse-cpp-ut-src ssl_ut.cpp)
+    LIST (APPEND datastore-cpp-ut-src ssl_ut.cpp)
 ENDIF ()
 
-ADD_EXECUTABLE (clickhouse-cpp-ut
-    ${clickhouse-cpp-ut-src}
+ADD_EXECUTABLE (datastore-cpp-ut
+    ${datastore-cpp-ut-src}
 )
 
-TARGET_LINK_LIBRARIES (clickhouse-cpp-ut
-    clickhouse-cpp-lib
+TARGET_LINK_LIBRARIES (datastore-cpp-ut
+    datastore-cpp-lib
     gtest-lib
 )
 
 IF (MSVC)
-    TARGET_COMPILE_OPTIONS(clickhouse-cpp-ut PRIVATE /bigobj)
-    TARGET_LINK_LIBRARIES (clickhouse-cpp-ut Crypt32)
+    TARGET_COMPILE_OPTIONS(datastore-cpp-ut PRIVATE /bigobj)
+    TARGET_LINK_LIBRARIES (datastore-cpp-ut Crypt32)
 ENDIF()

@@ -3,6 +3,6 @@ ADD_EXECUTABLE (bench
 )
 
 TARGET_LINK_LIBRARIES (bench
-    clickhouse-cpp-lib
+    datastore-cpp-lib
     benchmark
 )

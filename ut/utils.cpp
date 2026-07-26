@@ -1,22 +1,22 @@
 #include "utils.h"
 
-#include <clickhouse/block.h>
-#include <clickhouse/client.h>
-#include <clickhouse/columns/column.h>
-#include <clickhouse/columns/array.h>
-#include <clickhouse/columns/date.h>
-#include <clickhouse/columns/decimal.h>
-#include <clickhouse/columns/enum.h>
-#include <clickhouse/columns/geo.h>
-#include <clickhouse/columns/ip4.h>
-#include <clickhouse/columns/ip6.h>
-#include <clickhouse/columns/numeric.h>
-#include <clickhouse/columns/map.h>
-#include <clickhouse/columns/string.h>
-#include <clickhouse/columns/tuple.h>
-#include <clickhouse/columns/uuid.h>
+#include <datastore/block.h>
+#include <datastore/client.h>
+#include <datastore/columns/column.h>
+#include <datastore/columns/array.h>
+#include <datastore/columns/date.h>
+#include <datastore/columns/decimal.h>
+#include <datastore/columns/enum.h>
+#include <datastore/columns/geo.h>
+#include <datastore/columns/ip4.h>
+#include <datastore/columns/ip6.h>
+#include <datastore/columns/numeric.h>
+#include <datastore/columns/map.h>
+#include <datastore/columns/string.h>
+#include <datastore/columns/tuple.h>
+#include <datastore/columns/uuid.h>
 
-#include <clickhouse/base/socket.h> // for ipv4-ipv6 platform-specific stuff
+#include <datastore/base/socket.h> // for ipv4-ipv6 platform-specific stuff
 
 #include <cinttypes>
 #include <cstdint>
@@ -25,13 +25,13 @@
 #include <sstream>
 #include <stdexcept>
 #include <type_traits>
-#include "clickhouse/types/types.h"
+#include "datastore/types/types.h"
 #include "absl/numeric/int128.h"
 
 
 
 namespace {
-using namespace clickhouse;
+using namespace datastore;
 std::ostream & printColumnValue(const ColumnRef& c, const size_t row, std::ostream & ostr);
 
 struct DateTimeValue {
@@ -284,7 +284,7 @@ std::ostream& operator<<(std::ostream& ostr, const in6_addr& addr) {
     return ostr << ip_str;
 }
 
-namespace clickhouse {
+namespace datastore {
 
 std::ostream& operator<<(std::ostream & ostr, const Block & block) {
     if (block.GetRowCount() == 0 || block.GetColumnCount() == 0)
@@ -341,7 +341,7 @@ std::ostream & operator<<(std::ostream & ostr, const Progress & progress) {
 }
 
 std::ostream& operator<<(std::ostream& ostr, const ItemView& item_view) {
-    ostr << "ItemView {" << clickhouse::Type::TypeName(item_view.type) << " : ";
+    ostr << "ItemView {" << datastore::Type::TypeName(item_view.type) << " : ";
 
     switch (item_view.type) {
         case Type::Void:
@@ -423,7 +423,7 @@ std::ostream& operator<<(std::ostream& ostr, const ItemView& item_view) {
             break;
         case Type::UUID: {
             const auto & uuid_vals = reinterpret_cast<const uint64_t*>(item_view.data.data());
-            ostr << ToString(clickhouse::UUID{uuid_vals[0], uuid_vals[1]});
+            ostr << ToString(datastore::UUID{uuid_vals[0], uuid_vals[1]});
             break;
         }
         case Type::IPv4: {
@@ -491,7 +491,7 @@ uint64_t versionNumber(const ServerInfo & server_info) {
     return versionNumber(server_info.version_major, server_info.version_minor, server_info.version_patch, server_info.revision);
 }
 
-std::string ToString(const clickhouse::UUID& v) {
+std::string ToString(const datastore::UUID& v) {
     std::string result(36, 0);
     // ffff ff ff ss ssssss
     const int count = std::snprintf(result.data(), result.size() + 1, "%.8" PRIx64 "-%.4" PRIx64 "-%.4" PRIx64 "-%.4" PRIx64 "-%.12" PRIx64,

@@ -1,17 +1,17 @@
-#include <clickhouse/columns/array.h>
-#include <clickhouse/columns/tuple.h>
-#include <clickhouse/columns/date.h>
-#include <clickhouse/columns/enum.h>
-#include <clickhouse/columns/factory.h>
-#include <clickhouse/columns/lowcardinality.h>
-#include <clickhouse/columns/nullable.h>
-#include <clickhouse/columns/numeric.h>
-#include <clickhouse/columns/string.h>
-#include <clickhouse/columns/uuid.h>
-#include <clickhouse/columns/ip4.h>
-#include <clickhouse/columns/ip6.h>
-#include <clickhouse/base/input.h>
-#include <clickhouse/base/output.h>
+#include <datastore/columns/array.h>
+#include <datastore/columns/tuple.h>
+#include <datastore/columns/date.h>
+#include <datastore/columns/enum.h>
+#include <datastore/columns/factory.h>
+#include <datastore/columns/lowcardinality.h>
+#include <datastore/columns/nullable.h>
+#include <datastore/columns/numeric.h>
+#include <datastore/columns/string.h>
+#include <datastore/columns/uuid.h>
+#include <datastore/columns/ip4.h>
+#include <datastore/columns/ip6.h>
+#include <datastore/base/input.h>
+#include <datastore/base/output.h>
 
 #include <gtest/gtest.h>
 #include "utils.h"
@@ -21,7 +21,7 @@
 #include <vector>
 
 namespace {
-using namespace clickhouse;
+using namespace datastore;
 
 template <typename NestedColumnType, typename ValuesContainer>
 std::shared_ptr<ColumnArray> Create2DArray(const ValuesContainer& values) {
@@ -70,8 +70,8 @@ TEST(ColumnArray, Append) {
 }
 
 TEST(ColumnArray, ArrayOfDecimal) {
-    auto column = std::make_shared<clickhouse::ColumnDecimal>(18, 10);
-    auto array = std::make_shared<clickhouse::ColumnArray>(column->CloneEmpty());
+    auto column = std::make_shared<datastore::ColumnDecimal>(18, 10);
+    auto array = std::make_shared<datastore::ColumnArray>(column->CloneEmpty());
 
     column->Append("1");
     column->Append("2");
@@ -182,24 +182,24 @@ auto AppendRowAndTest(ArrayTSpecialization& array, const RowValuesContainer& val
         EXPECT_TRUE(CompareRecursive(*(values.begin() + i), new_row.At(i)))
                 << " at pos: " << i;
     }
-    EXPECT_THROW(new_row.At(new_row.size() + 1), clickhouse::ValidationError);
+    EXPECT_THROW(new_row.At(new_row.size() + 1), datastore::ValidationError);
 };
 
 template <typename NestedColumnType, typename AllValuesContainer>
 auto CreateAndTestColumnArrayT(const AllValuesContainer& all_values) {
-    auto array = std::make_shared<clickhouse::ColumnArrayT<NestedColumnType>>();
+    auto array = std::make_shared<datastore::ColumnArrayT<NestedColumnType>>();
 
     for (const auto & row : all_values) {
         EXPECT_NO_FATAL_FAILURE(AppendRowAndTest(*array, row));
     }
     EXPECT_TRUE(CompareRecursive(all_values, *array));
-    EXPECT_THROW(array->At(array->Size() + 1), clickhouse::ValidationError);
+    EXPECT_THROW(array->At(array->Size() + 1), datastore::ValidationError);
 
     return array;
 }
 
 TEST(ColumnArrayT, SimpleUInt64) {
-    auto array = std::make_shared<clickhouse::ColumnArrayT<ColumnUInt64>>();
+    auto array = std::make_shared<datastore::ColumnArrayT<ColumnUInt64>>();
     array->Append({0, 1, 2});
 
     ASSERT_EQ(1u, array->Size());
@@ -263,7 +263,7 @@ TEST(ColumnArrayT, SimpleUInt64_2D) {
 }
 
 TEST(ColumnArrayT, UInt64) {
-    // Check inserting\reading back data from clickhouse::ColumnArrayT<ColumnUInt64>
+    // Check inserting\reading back data from datastore::ColumnArrayT<ColumnUInt64>
 
     const std::vector<std::vector<unsigned int>> values = {
         {1u, 2u, 3u},
@@ -338,7 +338,7 @@ TEST(ColumnArrayT, Wrap_UInt64_2D) {
 }
 
 TEST(ColumnArrayT, Bool) {
-    // Check inserting\reading back data from clickhouse::ColumnArrayT<ColumnBool>
+    // Check inserting\reading back data from datastore::ColumnArrayT<ColumnBool>
 
     const std::vector<std::vector<uint8_t>> values = {
         {1u, 0u, 0u},
@@ -360,7 +360,7 @@ TEST(ColumnArrayT, left_value_no_move) {
         { value0, value1, value2}
     };
     size_t origin_size = 3;
-    auto array = std::make_shared<clickhouse::ColumnArrayT<clickhouse::ColumnArrayT<ColumnString>>>();
+    auto array = std::make_shared<datastore::ColumnArrayT<datastore::ColumnArrayT<ColumnString>>>();
     array->Append(all_values);
     EXPECT_EQ(3u, (*array)[0][0].size());
     EXPECT_EQ(3u, (*array)[0][1].size());
@@ -391,7 +391,7 @@ TEST(ColumnArrayT, right_value_move) {
         { value0, value1, value2},
         { value0, value1, value2}
     };
-    auto array = std::make_shared<clickhouse::ColumnArrayT<clickhouse::ColumnArrayT<ColumnString>>>();
+    auto array = std::make_shared<datastore::ColumnArrayT<datastore::ColumnArrayT<ColumnString>>>();
     array->Append(std::move(all_values));
     EXPECT_EQ(3u, (*array)[0][0].size());
     EXPECT_EQ(3u, (*array)[0][1].size());
@@ -415,7 +415,7 @@ TEST(ColumnArrayT, const_right_value_no_move) {
         { value0, value1, value2}
     };
     size_t origin_size = 3;
-    auto array = std::make_shared<clickhouse::ColumnArrayT<clickhouse::ColumnArrayT<ColumnString>>>();
+    auto array = std::make_shared<datastore::ColumnArrayT<datastore::ColumnArrayT<ColumnString>>>();
     array->Append(std::move(all_values));
     EXPECT_EQ(3u, (*array)[0][0].size());
     EXPECT_EQ(3u, (*array)[0][1].size());

@@ -1,20 +1,20 @@
-#include <clickhouse/columns/array.h>
-#include <clickhouse/columns/tuple.h>
-#include <clickhouse/columns/date.h>
-#include <clickhouse/columns/time.h>
-#include <clickhouse/columns/enum.h>
-#include <clickhouse/columns/lowcardinality.h>
-#include <clickhouse/columns/nullable.h>
-#include <clickhouse/columns/numeric.h>
-#include <clickhouse/columns/string.h>
-#include <clickhouse/columns/uuid.h>
-#include <clickhouse/columns/ip4.h>
-#include <clickhouse/columns/ip6.h>
-#include <clickhouse/base/input.h>
-#include <clickhouse/base/output.h>
-#include <clickhouse/base/socket.h> // for ipv4-ipv6 platform-specific stuff
+#include <datastore/columns/array.h>
+#include <datastore/columns/tuple.h>
+#include <datastore/columns/date.h>
+#include <datastore/columns/time.h>
+#include <datastore/columns/enum.h>
+#include <datastore/columns/lowcardinality.h>
+#include <datastore/columns/nullable.h>
+#include <datastore/columns/numeric.h>
+#include <datastore/columns/string.h>
+#include <datastore/columns/uuid.h>
+#include <datastore/columns/ip4.h>
+#include <datastore/columns/ip6.h>
+#include <datastore/base/input.h>
+#include <datastore/base/output.h>
+#include <datastore/base/socket.h> // for ipv4-ipv6 platform-specific stuff
 
-#include <clickhouse/client.h>
+#include <datastore/client.h>
 
 #include <gtest/gtest.h>
 #include <algorithm>
@@ -30,10 +30,10 @@
 #include "value_generators.h"
 
 namespace {
-using namespace clickhouse;
+using namespace datastore;
 }
 
-namespace clickhouse{
+namespace datastore{
 
 std::ostream& operator<<(std::ostream& ostr, const Type::Code& type_code) {
     return ostr << Type::TypeName(type_code) << " (" << static_cast<int>(type_code) << ")";
@@ -102,7 +102,7 @@ public:
         return std::tuple{column, values};
     }
 
-    static std::optional<std::string> CheckIfShouldSkipTest(clickhouse::Client& client) {
+    static std::optional<std::string> CheckIfShouldSkipTest(datastore::Client& client) {
         if constexpr (std::is_same_v<ColumnType, ColumnDate32>) {
             // Date32 first appeared in v21.9.2.17-stable
             const auto server_info = client.GetServerInfo();
@@ -130,7 +130,7 @@ public:
         SCOPED_TRACE(::testing::Message("Column type: ") << column->GetType().GetName());
         SCOPED_TRACE(::testing::Message("Client options: ") << client_options);
 
-        clickhouse::Client client(client_options);
+        datastore::Client client(client_options);
 
         if (auto message = CheckIfShouldSkipTest(client)) {
             GTEST_SKIP() << *message;
@@ -170,9 +170,9 @@ struct NumberColumnTestCase : public GenericColumnTestCase<ColumnTypeT, &makeCol
 };
 
 template <typename ColumnTypeT, size_t precision, size_t scale>
-struct DecimalColumnTestCase : public GenericColumnTestCase<ColumnDecimal, &makeColumn<ColumnDecimal, precision, scale>, clickhouse::Int128, &MakeDecimals<precision, scale>>
+struct DecimalColumnTestCase : public GenericColumnTestCase<ColumnDecimal, &makeColumn<ColumnDecimal, precision, scale>, datastore::Int128, &MakeDecimals<precision, scale>>
 {
-    using Base = GenericColumnTestCase<ColumnDecimal, &makeColumn<ColumnDecimal, precision, scale>, clickhouse::Int128, &MakeDecimals<precision, scale>>;
+    using Base = GenericColumnTestCase<ColumnDecimal, &makeColumn<ColumnDecimal, precision, scale>, datastore::Int128, &MakeDecimals<precision, scale>>;
 
     using ColumnType = typename Base::ColumnType;
     using Base::createColumn;
@@ -193,7 +193,7 @@ using TestCases = ::testing::Types<
     NumberColumnTestCase<ColumnFloat32>,
     NumberColumnTestCase<ColumnFloat64>,
 
-#if !CH_MAP_BOOL_TO_UINT8
+#if !DS_MAP_BOOL_TO_UINT8
     GenericColumnTestCase<ColumnBool, &makeColumn<ColumnBool>, uint8_t, &MakeBools>,
 #endif
 
@@ -203,11 +203,11 @@ using TestCases = ::testing::Types<
 
     GenericColumnTestCase<ColumnDate, &makeColumn<ColumnDate>, time_t, &MakeDates<time_t>>,
     GenericColumnTestCase<ColumnDate32, &makeColumn<ColumnDate32>, time_t, &MakeDates<time_t>>,
-    GenericColumnTestCase<ColumnDateTime, &makeColumn<ColumnDateTime>, clickhouse::Int64, &MakeDateTimes>,
-    GenericColumnTestCase<ColumnDateTime64, &makeColumn<ColumnDateTime64, 0>, clickhouse::Int64, &MakeDateTime64s<0>>,
-    GenericColumnTestCase<ColumnDateTime64, &makeColumn<ColumnDateTime64, 3>, clickhouse::Int64, &MakeDateTime64s<3>>,
-    GenericColumnTestCase<ColumnDateTime64, &makeColumn<ColumnDateTime64, 6>, clickhouse::Int64, &MakeDateTime64s<6>>,
-    GenericColumnTestCase<ColumnDateTime64, &makeColumn<ColumnDateTime64, 9>, clickhouse::Int64, &MakeDateTime64s<9>>,
+    GenericColumnTestCase<ColumnDateTime, &makeColumn<ColumnDateTime>, datastore::Int64, &MakeDateTimes>,
+    GenericColumnTestCase<ColumnDateTime64, &makeColumn<ColumnDateTime64, 0>, datastore::Int64, &MakeDateTime64s<0>>,
+    GenericColumnTestCase<ColumnDateTime64, &makeColumn<ColumnDateTime64, 3>, datastore::Int64, &MakeDateTime64s<3>>,
+    GenericColumnTestCase<ColumnDateTime64, &makeColumn<ColumnDateTime64, 6>, datastore::Int64, &MakeDateTime64s<6>>,
+    GenericColumnTestCase<ColumnDateTime64, &makeColumn<ColumnDateTime64, 9>, datastore::Int64, &MakeDateTime64s<9>>,
     GenericColumnTestCase<ColumnTime, &makeColumn<ColumnTime>, int32_t, &MakeTime>,
     GenericColumnTestCase<ColumnTime64, &makeColumn<ColumnTime64, 0>, int64_t, &MakeTime64<0>>,
     GenericColumnTestCase<ColumnTime64, &makeColumn<ColumnTime64, 3>, int64_t, &MakeTime64<3>>,
@@ -217,9 +217,9 @@ using TestCases = ::testing::Types<
     GenericColumnTestCase<ColumnIPv4, &makeColumn<ColumnIPv4>, in_addr, &MakeIPv4s>,
     GenericColumnTestCase<ColumnIPv6, &makeColumn<ColumnIPv6>, in6_addr, &MakeIPv6s>,
 
-    GenericColumnTestCase<ColumnInt128, &makeColumn<ColumnInt128>, clickhouse::Int128, &MakeInt128s>,
-    GenericColumnTestCase<ColumnUInt128, &makeColumn<ColumnUInt128>, clickhouse::UInt128, &MakeUInt128s>,
-    GenericColumnTestCase<ColumnUUID, &makeColumn<ColumnUUID>, clickhouse::UUID, &MakeUUIDs>,
+    GenericColumnTestCase<ColumnInt128, &makeColumn<ColumnInt128>, datastore::Int128, &MakeInt128s>,
+    GenericColumnTestCase<ColumnUInt128, &makeColumn<ColumnUInt128>, datastore::UInt128, &MakeUInt128s>,
+    GenericColumnTestCase<ColumnUUID, &makeColumn<ColumnUUID>, datastore::UUID, &MakeUUIDs>,
 
     DecimalColumnTestCase<ColumnDecimal, 18, 0>,
     DecimalColumnTestCase<ColumnDecimal, 18, 6>,
@@ -298,8 +298,8 @@ inline auto convertValueForGetItem(const ColumnType& col, ValueType&& t) {
         // Since ColumnDecimal can hold 32, 64, 128-bit wide data and there is no way telling at run-time.
         const ItemView item = col.GetItem(0);
         return std::string_view(reinterpret_cast<const char*>(&t), item.data.size());
-    } else if constexpr (std::is_same_v<T, clickhouse::UInt128> || std::is_same_v<T, clickhouse::UUID>
-            || std::is_same_v<T, clickhouse::Int128>) {
+    } else if constexpr (std::is_same_v<T, datastore::UInt128> || std::is_same_v<T, datastore::UUID>
+            || std::is_same_v<T, datastore::Int128>) {
         return std::string_view{reinterpret_cast<const char*>(&t), sizeof(T)};
     } else if constexpr (std::is_same_v<T, in_addr>) {
         return htonl(t.s_addr);
@@ -456,16 +456,16 @@ TYPED_TEST(GenericColumnTest, LoadAndSave) {
 }
 
 const auto LocalHostEndpoint = ClientOptions()
-        .SetHost(           getEnvOrDefault("CLICKHOUSE_HOST",     "localhost"))
-        .SetPort(   getEnvOrDefault<size_t>("CLICKHOUSE_PORT",     "9000"))
-        .SetUser(           getEnvOrDefault("CLICKHOUSE_USER",     "default"))
-        .SetPassword(       getEnvOrDefault("CLICKHOUSE_PASSWORD", ""))
-        .SetDefaultDatabase(getEnvOrDefault("CLICKHOUSE_DB",       "default"));
+        .SetHost(           getEnvOrDefault("DATASTORE_HOST",     "localhost"))
+        .SetPort(   getEnvOrDefault<size_t>("DATASTORE_PORT",     "9000"))
+        .SetUser(           getEnvOrDefault("DATASTORE_USER",     "default"))
+        .SetPassword(       getEnvOrDefault("DATASTORE_PASSWORD", ""))
+        .SetDefaultDatabase(getEnvOrDefault("DATASTORE_DB",       "default"));
 
 const auto AllCompressionMethods = {
-    clickhouse::CompressionMethod::None,
-    clickhouse::CompressionMethod::LZ4,
-    clickhouse::CompressionMethod::ZSTD
+    datastore::CompressionMethod::None,
+    datastore::CompressionMethod::LZ4,
+    datastore::CompressionMethod::ZSTD
 };
 
 TYPED_TEST(GenericColumnTest, RoundTrip) {

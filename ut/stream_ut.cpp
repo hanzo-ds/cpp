@@ -1,10 +1,10 @@
-#include <clickhouse/base/wire_format.h>
-#include <clickhouse/base/output.h>
-#include <clickhouse/base/input.h>
+#include <datastore/base/wire_format.h>
+#include <datastore/base/output.h>
+#include <datastore/base/input.h>
 
 #include <gtest/gtest.h>
 
-using namespace clickhouse;
+using namespace datastore;
 
 TEST(CodedStreamCase, Varint64) {
     Buffer buf;

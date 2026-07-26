@@ -1,20 +1,23 @@
 #include "connection_failed_client_test.h"
 #include "utils.h"
 
-#include <clickhouse/columns/column.h>
-#include <clickhouse/block.h>
+#include <datastore/columns/column.h>
+#include <datastore/block.h>
 
 #include <memory>
 #include <iostream>
 
 namespace {
-    using namespace clickhouse;
+    using namespace datastore;
 }
 
 TEST_P(ConnectionFailedClientTest, ValidateConnectionError) {
 
     const auto & client_options = std::get<0>(GetParam());
     const auto & ee = std::get<1>(GetParam());
+
+    if (client_options.host.empty() && client_options.endpoints.empty())
+        GTEST_SKIP() << "No server configured: set the corresponding *_HOST environment variable.";
 
     std::unique_ptr<Client> client;
     try {

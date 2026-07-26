@@ -5,7 +5,7 @@
 #include <math.h>
 
 namespace {
-using namespace clickhouse;
+using namespace datastore;
 }
 
 std::vector<uint32_t> MakeNumbers() {
@@ -101,7 +101,7 @@ std::vector<int32_t> MakeDates32() {
     return result;
 }
 
-std::vector<clickhouse::Int64> MakeDateTimes() {
+std::vector<datastore::Int64> MakeDateTimes() {
     // in CH DateTime internally a UInt32
     return {
         0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536,
@@ -110,7 +110,7 @@ std::vector<clickhouse::Int64> MakeDateTimes() {
     };
 }
 
-std::vector<clickhouse::Int128> MakeInt128s() {
+std::vector<datastore::Int128> MakeInt128s() {
     return {
         absl::MakeInt128(0xffffffffffffffffll, 0xffffffffffffffffll), // -1
         absl::MakeInt128(0, 0xffffffffffffffffll),  // 2^64 - 1
@@ -120,7 +120,7 @@ std::vector<clickhouse::Int128> MakeInt128s() {
     };
 }
 
-std::vector<clickhouse::UInt128> MakeUInt128s() {
+std::vector<datastore::UInt128> MakeUInt128s() {
     return {
         absl::MakeUint128(0xffffffffffffffffll, 0xffffffffffffffffll), // 2^128 - 1
         absl::MakeUint128(0, 0xffffffffffffffffll),  // 2^64 - 1
@@ -156,13 +156,13 @@ std::vector<int32_t> MakeTime() {
     return ret;
 }
 
-std::vector<clickhouse::Int128> MakeDecimals(size_t /*precision*/, size_t scale) {
+std::vector<datastore::Int128> MakeDecimals(size_t /*precision*/, size_t scale) {
     const auto scale_multiplier = static_cast<size_t>(std::pow(10, scale));
     const long long int rhs_value = 12345678910;
 
     const std::vector<long long int> vals {0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536 - 1};
 
-    std::vector<clickhouse::Int128> result;
+    std::vector<datastore::Int128> result;
     result.reserve(vals.size());
 
     std::transform(vals.begin(), vals.end(), std::back_inserter(result), [scale_multiplier, rhs_value](const auto& value) {

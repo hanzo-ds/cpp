@@ -1,30 +1,18 @@
 <?xml version="1.0"?>
+<!--
+  Server-side settings the test suite depends on, layered over the config the
+  ghcr.io/hanzoai/datastore image already ships (see ../docker-compose.yml).
+
+  The root element is <clickhouse> ON PURPOSE. It is defined by the SERVER, not
+  by this client, and it must match the root of the drop-ins the image ships in
+  config.d/ - those are what white-label the data paths, set the wildcard
+  listen_host and put the engine's HTTP port behind the nginx proxy. A
+  mismatched root does NOT fail loudly: the server logs "Merging bypassed" and
+  starts with every drop-in silently discarded.
+-->
 <clickhouse>
 
-  <http_port>8123</http_port>
-  <tcp_port>9000</tcp_port>
-
-  <users_config>users.xml</users_config>
-  <default_profile>default</default_profile>
-  <default_database>default</default_database>
-
-  <mark_cache_size>5368709120</mark_cache_size>
-
-  <path>/var/lib/clickhouse/</path>
-  <tmp_path>/var/lib/clickhouse/tmp/</tmp_path>
-  <user_files_path>/var/lib/clickhouse/user_files/</user_files_path>
-  <access_control_path>/var/lib/clickhouse/access/</access_control_path>
-  <keep_alive_timeout>3</keep_alive_timeout>
-
-  <logger>
-    <level>debug</level>
-    <log>/var/log/clickhouse-server/clickhouse-server.log</log>
-    <errorlog>/var/log/clickhouse-server/clickhouse-server.err.log</errorlog>
-    <size>1000M</size>
-    <count>10</count>
-    <console>1</console>
-  </logger>
-
+  <!-- Tests read system.query_log right after issuing a query, so flush fast. -->
   <query_log>
     <database>system</database>
     <table>query_log</table>
@@ -32,13 +20,7 @@
     <flush_interval_milliseconds>1000</flush_interval_milliseconds>
   </query_log>
 
-  <format_schema_path>/var/lib/clickhouse/format_schemas/</format_schema_path>
-  <user_directories>
-    <users_xml>
-      <path>users.xml</path>
-    </users_xml>
-  </user_directories>
-
+  <!-- Required by the tracing-context tests. -->
   <opentelemetry_span_log>
     <engine>
       engine MergeTree

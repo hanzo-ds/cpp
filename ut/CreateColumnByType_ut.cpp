@@ -1,14 +1,14 @@
-#include <clickhouse/columns/bool.h>
-#include <clickhouse/columns/factory.h>
-#include <clickhouse/columns/date.h>
-#include <clickhouse/columns/numeric.h>
-#include <clickhouse/columns/string.h>
-#include <clickhouse/columns/json.h>
+#include <datastore/columns/bool.h>
+#include <datastore/columns/factory.h>
+#include <datastore/columns/date.h>
+#include <datastore/columns/numeric.h>
+#include <datastore/columns/string.h>
+#include <datastore/columns/json.h>
 
 #include <gtest/gtest.h>
 
 namespace {
-using namespace clickhouse;
+using namespace datastore;
 }
 
 TEST(CreateColumnByType, CreateSimpleAggregateFunction) {
@@ -64,7 +64,7 @@ class CreateColumnByTypeWithName : public ::testing::TestWithParam<const char* /
 TEST(CreateColumnByType, Bool) {
     const auto col = CreateColumnByType("Bool");
     ASSERT_NE(nullptr, col);
-#if CH_MAP_BOOL_TO_UINT8
+#if DS_MAP_BOOL_TO_UINT8
     EXPECT_EQ(col->GetType().GetName(), "UInt8");
     EXPECT_EQ(col->GetType().GetCode(), Type::UInt8);
     EXPECT_NE(nullptr, col->As<ColumnUInt8>());
@@ -88,7 +88,7 @@ INSTANTIATE_TEST_SUITE_P(Basic, CreateColumnByTypeWithName, ::testing::Values(
     "String", "Date", "DateTime",
     "UUID", "Int128", "UInt128"
 ));
-#if !CH_MAP_BOOL_TO_UINT8
+#if !DS_MAP_BOOL_TO_UINT8
 INSTANTIATE_TEST_SUITE_P(BasicBool, CreateColumnByTypeWithName, ::testing::Values("Bool"));
 #endif
 

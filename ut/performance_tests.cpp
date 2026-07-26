@@ -1,14 +1,14 @@
-#include <clickhouse/columns/array.h>
-#include <clickhouse/columns/date.h>
-#include <clickhouse/columns/enum.h>
-#include <clickhouse/columns/lowcardinality.h>
-#include <clickhouse/columns/nullable.h>
-#include <clickhouse/columns/numeric.h>
-#include <clickhouse/columns/string.h>
-#include <clickhouse/columns/uuid.h>
-#include <clickhouse/client.h>
-#include <clickhouse/base/output.h>
-#include <clickhouse/base/input.h>
+#include <datastore/columns/array.h>
+#include <datastore/columns/date.h>
+#include <datastore/columns/enum.h>
+#include <datastore/columns/lowcardinality.h>
+#include <datastore/columns/nullable.h>
+#include <datastore/columns/numeric.h>
+#include <datastore/columns/string.h>
+#include <datastore/columns/uuid.h>
+#include <datastore/client.h>
+#include <datastore/base/output.h>
+#include <datastore/base/input.h>
 
 #include <gtest/gtest.h>
 
@@ -17,7 +17,7 @@
 #include "utils.h"
 #include "utils_performance.h"
 
-using namespace clickhouse;
+using namespace datastore;
 
 inline std::uint64_t generate(const ColumnUInt64&, size_t index) {
     const auto base = static_cast<std::uint64_t>(index) % 255;
@@ -175,11 +175,11 @@ TYPED_TEST_P(ColumnPerformanceTest, InsertAndSelect) {
 
     auto column = InstantiateColumn<ColumnType>();
     Client client(ClientOptions()
-            .SetHost(           getEnvOrDefault("CLICKHOUSE_HOST",     "localhost"))
-            .SetPort( std::stoi(getEnvOrDefault("CLICKHOUSE_PORT",     "9000")))
-            .SetUser(           getEnvOrDefault("CLICKHOUSE_USER",     "default"))
-            .SetPassword(       getEnvOrDefault("CLICKHOUSE_PASSWORD", ""))
-            .SetDefaultDatabase(getEnvOrDefault("CLICKHOUSE_DB",       "default"))
+            .SetHost(           getEnvOrDefault("DATASTORE_HOST",     "localhost"))
+            .SetPort( std::stoi(getEnvOrDefault("DATASTORE_PORT",     "9000")))
+            .SetUser(           getEnvOrDefault("DATASTORE_USER",     "default"))
+            .SetPassword(       getEnvOrDefault("DATASTORE_PASSWORD", ""))
+            .SetDefaultDatabase(getEnvOrDefault("DATASTORE_DB",       "default"))
     );
     // client.Execute("CREATE DATABASE IF NOT EXISTS PerformanceTests");
     client.Execute("DROP TEMPORARY TABLE IF EXISTS PerformanceTests_ColumnTest");

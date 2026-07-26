@@ -1,8 +1,8 @@
 #pragma once
 
-#include <clickhouse/base/socket.h> // for ipv4-ipv6 platform-specific stuff
-#include <clickhouse/columns/numeric.h>
-#include <clickhouse/columns/uuid.h>
+#include <datastore/base/socket.h> // for ipv4-ipv6 platform-specific stuff
+#include <datastore/columns/numeric.h>
+#include <datastore/columns/uuid.h>
 
 #include "utils.h"
 
@@ -36,15 +36,15 @@ std::vector<uint8_t> MakeBools();
 std::vector<std::string> MakeFixedStrings(size_t string_size);
 std::vector<std::string> MakeStrings();
 std::vector<std::string> MakeJSONs();
-std::vector<clickhouse::Int64> MakeDateTime64s(size_t scale, size_t values_size = 200);
+std::vector<datastore::Int64> MakeDateTime64s(size_t scale, size_t values_size = 200);
 std::vector<int32_t> MakeDates32();
-std::vector<clickhouse::Int64> MakeDateTimes();
+std::vector<datastore::Int64> MakeDateTimes();
 std::vector<in_addr> MakeIPv4s();
 std::vector<in6_addr> MakeIPv6s();
-std::vector<clickhouse::UUID> MakeUUIDs();
-std::vector<clickhouse::Int128> MakeInt128s();
-std::vector<clickhouse::UInt128> MakeUInt128s();
-std::vector<clickhouse::Int128> MakeDecimals(size_t precision, size_t scale);
+std::vector<datastore::UUID> MakeUUIDs();
+std::vector<datastore::Int128> MakeInt128s();
+std::vector<datastore::UInt128> MakeUInt128s();
+std::vector<datastore::Int128> MakeDecimals(size_t precision, size_t scale);
 
 template <typename T, std::enable_if_t<std::is_integral<T>::value, bool> = true>
 inline std::vector<T> MakeNumbers() {
@@ -101,12 +101,12 @@ inline std::vector<std::string> MakeFixedStrings() {
 }
 
 template <size_t scale>
-inline std::vector<clickhouse::Int64> MakeDateTime64s() {
+inline std::vector<datastore::Int64> MakeDateTime64s() {
     return MakeDateTime64s(scale);
 }
 
 template <size_t precision, size_t scale>
-inline std::vector<clickhouse::Int128> MakeDecimals() {
+inline std::vector<datastore::Int128> MakeDecimals() {
     return MakeDecimals(precision, scale);
 }
 

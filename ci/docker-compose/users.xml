@@ -1,4 +1,8 @@
 <?xml version="1.0"?>
+<!--
+  Server-side configuration. The root element is <clickhouse> ON PURPOSE - it is
+  defined by the SERVER image, not by this client. See config.xml.
+-->
 <clickhouse>
 
   <profiles>

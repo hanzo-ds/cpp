@@ -1,17 +1,21 @@
 #include "readonly_client_test.h"
 #include "utils.h"
 
-#include <clickhouse/columns/column.h>
-#include <clickhouse/block.h>
+#include <datastore/columns/column.h>
+#include <datastore/block.h>
 
 #include <iostream>
 
 namespace {
-    using namespace clickhouse;
+    using namespace datastore;
 }
 
 void ReadonlyClientTest::SetUp() {
-    client_ = std::make_unique<Client>(std::get<0>(GetParam()));
+    const auto & options = std::get<0>(GetParam());
+    if (options.host.empty() && options.endpoints.empty())
+        GTEST_SKIP() << "No server configured: set the corresponding *_HOST environment variable.";
+
+    client_ = std::make_unique<Client>(options);
 }
 
 void ReadonlyClientTest::TearDown() {

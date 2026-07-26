@@ -101,7 +101,7 @@ jobs:
             -D CMAKE_C_COMPILER=${{matrix.C_COMPILER}} \
             -D CMAKE_CXX_COMPILER=${{matrix.CXX_COMPILER}} \
             -D CMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} \
-            -D CH_MAP_BOOL_TO_UINT8=OFF \
+            -D DS_MAP_BOOL_TO_UINT8=OFF \
             -D BUILD_TESTS=ON \
             ${{matrix.SSL_CMAKE_OPTION}} \
             ${{matrix.DEPENDENCIES_CMAKE_OPTIONS}} \
@@ -115,24 +115,24 @@ jobs:
             --config ${{env.BUILD_TYPE}} \
             --target all
 
-      - name: Start ClickHouse in Docker
+      - name: Start Datastore in Docker
         uses: hoverkraft-tech/compose-action@v2.0.1
         with:
           compose-file: ci/docker-compose.yml
           down-flags: --volumes
 
-      - name: Check if ClickHouse is available
+      - name: Check if Datastore is available
         run: |
           for i in {1..60}; do
             if curl -fsS http://localhost:8123/ > /dev/null; then
-              echo "ClickHouse is ready"
+              echo "Datastore is ready"
               exit 0
             fi
             sleep 1
           done
-          echo "ClickHouse failed to start"
+          echo "Datastore failed to start"
           exit 1
   
       - name: Test
         working-directory: ${{github.workspace}}/build/ut
-        run: ./clickhouse-cpp-ut
+        run: ./datastore-cpp-ut

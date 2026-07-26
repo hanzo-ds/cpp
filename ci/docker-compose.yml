@@ -1,9 +1,9 @@
 services:
-    clickhouse:
-        image: 'docker.io/clickhouse/clickhouse-server:${CLICKHOUSE_VERSION-25.12-alpine}'
-        container_name: 'clickhouse-odbc-clickhouse-server'
+    datastore:
+        image: 'ghcr.io/hanzoai/datastore:${DATASTORE_VERSION-26.2.3.2}'
+        container_name: 'datastore-cpp-server'
         environment:
-            CLICKHOUSE_SKIP_USER_SETUP: 1
+            DATASTORE_SKIP_USER_SETUP: 1
         ports:
             - '8123:8123'
             - '9000:9000'
@@ -11,12 +11,14 @@ services:
             nofile:
                 soft: 262144
                 hard: 262144
+        # config.xml is layered in as a drop-in so the image keeps its own
+        # config.d white-labelling (data paths, listen_host, nginx port proxy).
         volumes:
-            - './docker-compose/config.xml:/etc/clickhouse-server/config.xml:z'
-            - './docker-compose/users.xml:/etc/clickhouse-server/users.xml:z'
+            - './docker-compose/config.xml:/etc/hanzo-datastore-server/config.d/ci.xml:z'
+            - './docker-compose/users.xml:/etc/hanzo-datastore-server/users.xml:z'
         networks:
-            - clickhouse-odbc
+            - datastore
 
 networks:
-    clickhouse-odbc:
+    datastore:
         driver: bridge

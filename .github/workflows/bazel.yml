@@ -40,49 +40,30 @@ jobs:
           repository-cache: true
 
       - name: Build project
-        run: bazel build //... --@clickhouse-cpp-client//:tls=${{ matrix.tls }}
+        run: bazel build //... --@datastore-cpp-client//:tls=${{ matrix.tls }}
 
       - name: Run unit tests
-        run: bazel test //ut:unit_tests --@clickhouse-cpp-client//:tls=${{ matrix.tls }} --test_output=errors
+        run: bazel test //ut:unit_tests --@datastore-cpp-client//:tls=${{ matrix.tls }} --test_output=errors
 
       # //ut:e2e_tests is tagged `manual`, so `bazel build //...` above
       # skips it; build it explicitly so the run step below doesn't pay
       # for compilation under the running-server timeout.
       - name: Build e2e tests
-        run: bazel build //ut:e2e_tests --@clickhouse-cpp-client//:tls=${{ matrix.tls }}
+        if: runner.os != 'macOS'
+        run: bazel build //ut:e2e_tests --@datastore-cpp-client//:tls=${{ matrix.tls }}
 
-      # The e2e suite needs a live server on localhost:9000. Each OS starts
-      # one the same way the CMake build's per-OS workflows do, since hosted
-      # runners can't all run a Linux container the same way:
-      #   * Linux   — docker-compose (linux.yml)
-      #   * macOS   — the native ClickHouse build run as a process (macos.yml)
-      #   * Windows — the Linux container under WSL2 + podman (windows_msvc.yml)
-      - name: Start ClickHouse (Linux, docker-compose)
+      # The e2e suite needs a live server on localhost:9000. The one way to get
+      # one is ci/docker-compose.yml, so it runs where a container can:
+      #   * Linux   — docker-compose directly
+      #   * Windows — the same compose file under WSL2 + podman
+      #   * macOS   — not available on hosted runners, so e2e is skipped there
+      #               and only the hermetic //ut:unit_tests target runs.
+      - name: Start Datastore (Linux, docker-compose)
         if: runner.os == 'Linux'
         uses: hoverkraft-tech/compose-action@v2.0.1
         with:
           compose-file: ci/docker-compose.yml
           down-flags: --volumes
-
-      - name: Start ClickHouse (macOS, native binary)
-        if: runner.os == 'macOS'
-        working-directory: ${{ runner.temp }}
-        run: |
-          curl https://builds.clickhouse.com/25.12/macos-aarch64/clickhouse -o clickhouse
-          chmod +x ./clickhouse
-          sudo mkdir -p /var/lib/clickhouse /var/log/clickhouse-server
-          sudo chown -R "$USER" /var/lib/clickhouse /var/log/clickhouse-server
-          nohup ./clickhouse server --config-file="$GITHUB_WORKSPACE/ci/docker-compose/config.xml" > clickhouse.log 2>&1 &
-          for i in {1..60}; do
-            if curl -fsS http://localhost:8123/ > /dev/null; then
-              echo "ClickHouse is ready"
-              exit 0
-            fi
-            sleep 1
-          done
-          echo "ClickHouse failed to start"
-          tail -200 clickhouse.log || true
-          exit 1
 
       - name: Enable WSL (Windows)
         if: runner.os == 'Windows'
@@ -93,7 +74,7 @@ jobs:
             podman
             podman-compose
 
-      - name: Start ClickHouse (Windows, WSL + podman)
+      - name: Start Datastore (Windows, WSL + podman)
         if: runner.os == 'Windows'
         shell: wsl-bash {0}
         run: |
@@ -103,18 +84,20 @@ jobs:
             'until curl -s -o /dev/null -w "%{http_code}" http://localhost:8123 | grep -q "200"; do sleep 2; done'
           curl -s http://localhost:8123/?query=SELECT%20VERSION%28%29
 
-      - name: Wait for ClickHouse (Linux)
+      - name: Wait for Datastore (Linux)
         if: runner.os == 'Linux'
         run: |
           for i in {1..60}; do
             if curl -fsS http://localhost:8123/ > /dev/null; then
-              echo "ClickHouse is ready"
+              echo "Datastore is ready"
               exit 0
             fi
             sleep 1
           done
-          echo "ClickHouse failed to start"
+          echo "Datastore failed to start"
           exit 1
 
+      # No container on hosted macOS runners, so no server to test against.
       - name: Run e2e tests
-        run: bazel test //ut:e2e_tests --@clickhouse-cpp-client//:tls=${{ matrix.tls }} --test_output=errors
+        if: runner.os != 'macOS'
+        run: bazel test //ut:e2e_tests --@datastore-cpp-client//:tls=${{ matrix.tls }} --test_output=errors

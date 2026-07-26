@@ -1,12 +1,12 @@
-#include <clickhouse/types/types.h>
-#include <clickhouse/columns/bool.h>
-#include <clickhouse/columns/factory.h>
-#include <clickhouse/columns/numeric.h>
+#include <datastore/types/types.h>
+#include <datastore/columns/bool.h>
+#include <datastore/columns/factory.h>
+#include <datastore/columns/numeric.h>
 #include <ut/utils.h>
 
 #include <gtest/gtest.h>
 
-using namespace clickhouse;
+using namespace datastore;
 
 TEST(TypesCase, TypeName) {
     ASSERT_EQ(Type::CreateDate()->GetName(), "Date");
@@ -144,7 +144,7 @@ TEST(TypesCase, DecimalTypes) {
 
 TEST(TypesCase, IsEqual) {
     const std::string type_names[] = {
-#if !CH_MAP_BOOL_TO_UINT8
+#if !DS_MAP_BOOL_TO_UINT8
         "Bool",
 #endif
         "UInt8",
@@ -191,7 +191,7 @@ TEST(TypesCase, IsEqual) {
     // - same Type layout (matching outer type with all nested types and/or parameters)
     for (const auto & type_name : type_names) {
         SCOPED_TRACE(type_name);
-        const auto type = clickhouse::CreateColumnByType(type_name)->Type();
+        const auto type = datastore::CreateColumnByType(type_name)->Type();
 
         // Should be equal to itself
         EXPECT_TRUE(type->IsEqual(type));
@@ -199,7 +199,7 @@ TEST(TypesCase, IsEqual) {
 
         for (const auto & other_type_name : type_names) {
             SCOPED_TRACE(other_type_name);
-            const auto other_column = clickhouse::CreateColumnByType(other_type_name);
+            const auto other_column = datastore::CreateColumnByType(other_type_name);
             ASSERT_NE(nullptr, other_column);
 
             const auto other_type = other_column->Type();
@@ -221,6 +221,6 @@ TEST(TypesCase, ErrorEnumContent) {
 
     for (const auto& type_name : type_names) {
         SCOPED_TRACE(type_name);
-        EXPECT_THROW(clickhouse::CreateColumnByType(type_name)->Type(), ValidationError);
+        EXPECT_THROW(datastore::CreateColumnByType(type_name)->Type(), ValidationError);
     }
 }

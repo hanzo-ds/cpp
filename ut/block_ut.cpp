@@ -1,9 +1,9 @@
-#include <clickhouse/client.h>
-#include <clickhouse/columns/tuple.h>
-#include <clickhouse/types/types.h>
+#include <datastore/client.h>
+#include <datastore/columns/tuple.h>
+#include <datastore/types/types.h>
 
-#include "clickhouse/columns/column.h"
-#include "clickhouse/columns/lowcardinality.h"
+#include "datastore/columns/column.h"
+#include "datastore/columns/lowcardinality.h"
 #include "gtest/gtest-message.h"
 
 #include "ut/utils_comparison.h"
@@ -13,7 +13,7 @@
 #include <memory>
 
 namespace {
-using namespace clickhouse;
+using namespace datastore;
 
 Block MakeBlock(std::vector<std::pair<std::string, ColumnRef>> columns) {
     Block result;

@@ -2,7 +2,7 @@
 
 #include <memory>
 
-namespace clickhouse {
+namespace datastore {
 
 class InputStream;
 class OutputStream;

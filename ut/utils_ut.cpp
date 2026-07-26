@@ -1,12 +1,12 @@
 #include <gtest/gtest.h>
-#include "clickhouse/base/uuid.h"
-#include "clickhouse/columns/date.h"
-#include "clickhouse/columns/decimal.h"
-#include "clickhouse/columns/enum.h"
-#include "clickhouse/columns/ip4.h"
-#include "clickhouse/columns/numeric.h"
-#include "clickhouse/columns/string.h"
-#include "clickhouse/columns/uuid.h"
+#include "datastore/base/uuid.h"
+#include "datastore/columns/date.h"
+#include "datastore/columns/decimal.h"
+#include "datastore/columns/enum.h"
+#include "datastore/columns/ip4.h"
+#include "datastore/columns/numeric.h"
+#include "datastore/columns/string.h"
+#include "datastore/columns/uuid.h"
 #include "ut/value_generators.h"
 #include "utils.h"
 #include "absl/numeric/int128.h"
@@ -134,7 +134,7 @@ TEST(CompareRecursive, CompareNestedContainers) {
 }
 
 TEST(StringUtils, UUID) {
-    const clickhouse::UUID& uuid{0x0102030405060708, 0x090a0b0c0d0e0f10};
+    const datastore::UUID& uuid{0x0102030405060708, 0x090a0b0c0d0e0f10};
     const std::string uuid_string = "01020304-0506-0708-090a-0b0c0d0e0f10";
     EXPECT_EQ(ToString(uuid), uuid_string);
 }
@@ -207,7 +207,7 @@ TEST(Generators, MakeArrays) {
 }
 
 // I.e. object ItemView can be serialized to string
-std::string toString(const clickhouse::ItemView & iv) {
+std::string toString(const datastore::ItemView & iv) {
     std::stringstream sstr;
     sstr << iv;
 
@@ -230,7 +230,7 @@ TEST(ItemView, OutputToOstream_VALID) {
     // Testing output of `std::ostream& operator<<(std::ostream& ostr, const ItemView& item_view)`
     // result must match predefined value.
 
-    using namespace clickhouse;
+    using namespace datastore;
 
     // Positive cases: output should be generated
     EXPECTED_SERIALIZATION("String : \"string\" (6 bytes)", ColumnString(), "string");
@@ -294,14 +294,14 @@ TEST(ItemView, OutputToOstream_VALID) {
 
 namespace {
 
-clickhouse::ItemView MakeEmptyItemView(clickhouse::Type::Code type_code) {
-    return clickhouse::ItemView(type_code, std::string_view());
+datastore::ItemView MakeEmptyItemView(datastore::Type::Code type_code) {
+    return datastore::ItemView(type_code, std::string_view());
 }
 
 }
 
 TEST(ItemView, OutputToOstream_negative) {
-    using namespace clickhouse;
+    using namespace datastore;
 
     // Doesn't matter what content we point ItemView into, those types are not supported.
     EXPECT_ANY_THROW(toString(MakeEmptyItemView(Type::LowCardinality)));

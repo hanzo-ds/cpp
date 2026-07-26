@@ -1,10 +1,10 @@
 #pragma once
 
-#include <clickhouse/base/platform.h>
-#include <clickhouse/base/uuid.h>
+#include <datastore/base/platform.h>
+#include <datastore/base/uuid.h>
 
-#include "clickhouse/columns/itemview.h"
-#include "clickhouse/query.h"
+#include "datastore/columns/itemview.h"
+#include "datastore/query.h"
 #include "utils_meta.h"
 #include "utils_comparison.h"
 
@@ -22,7 +22,7 @@
 
 #include <gtest/gtest.h>
 
-namespace clickhouse {
+namespace datastore {
     class Client;
     class Block;
     class Type;
@@ -136,10 +136,10 @@ struct in_addr;
 struct in6_addr;
 // Helper for pretty-printing of the Block
 struct PrettyPrintBlock {
-    const clickhouse::Block & block;
+    const datastore::Block & block;
 };
 
-namespace clickhouse {
+namespace datastore {
 std::ostream& operator<<(std::ostream & ostr, const Block & block);
 std::ostream& operator<<(std::ostream & ostr, const Type & type);
 std::ostream & operator<<(std::ostream & ostr, const ServerInfo & server_info);
@@ -206,6 +206,6 @@ inline uint64_t versionNumber(
     return result;
 }
 
-uint64_t versionNumber(const clickhouse::ServerInfo & server_info);
+uint64_t versionNumber(const datastore::ServerInfo & server_info);
 
-std::string ToString(const clickhouse::UUID& v);
+std::string ToString(const datastore::UUID& v);

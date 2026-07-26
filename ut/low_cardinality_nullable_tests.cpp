@@ -1,23 +1,23 @@
 #include <gtest/gtest.h>
-#include <clickhouse/columns/string.h>
-#include "clickhouse/columns/nullable.h"
-#include "clickhouse/columns/lowcardinality.h"
-#include "clickhouse/client.h"
+#include <datastore/columns/string.h>
+#include "datastore/columns/nullable.h"
+#include "datastore/columns/lowcardinality.h"
+#include "datastore/client.h"
 #include "utils.h"
-#include "clickhouse/base/wire_format.h"
-#include <clickhouse/base/output.h>
+#include "datastore/base/wire_format.h"
+#include <datastore/base/output.h>
 
 namespace
 {
-using namespace clickhouse;
+using namespace datastore;
 }
 
 static const auto localHostEndpoint = ClientOptions()
-                                   .SetHost(           getEnvOrDefault("CLICKHOUSE_HOST",     "localhost"))
-                                   .SetPort(   getEnvOrDefault<size_t>("CLICKHOUSE_PORT",     "9000"))
-                                   .SetUser(           getEnvOrDefault("CLICKHOUSE_USER",     "default"))
-                                   .SetPassword(       getEnvOrDefault("CLICKHOUSE_PASSWORD", ""))
-                                   .SetDefaultDatabase(getEnvOrDefault("CLICKHOUSE_DB",       "default"));
+                                   .SetHost(           getEnvOrDefault("DATASTORE_HOST",     "localhost"))
+                                   .SetPort(   getEnvOrDefault<size_t>("DATASTORE_PORT",     "9000"))
+                                   .SetUser(           getEnvOrDefault("DATASTORE_USER",     "default"))
+                                   .SetPassword(       getEnvOrDefault("DATASTORE_PASSWORD", ""))
+                                   .SetDefaultDatabase(getEnvOrDefault("DATASTORE_DB",       "default"));
 
 
 ColumnRef buildTestColumn(const std::vector<std::string>& rowsData, const std::vector<uint8_t>& nulls) {

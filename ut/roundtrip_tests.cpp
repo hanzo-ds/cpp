@@ -1,4 +1,4 @@
-#include <clickhouse/client.h>
+#include <datastore/client.h>
 
 #include "utils.h"
 #include "roundtrip_column.h"
@@ -7,7 +7,7 @@
 #include <map>
 #include <optional>
 
-using namespace clickhouse;
+using namespace datastore;
 
 // Use value-parameterized tests to run same tests with different client
 // options.
@@ -373,11 +373,11 @@ TEST_P(RoundtripCase, RoundtripArrayLowCardinalityTString) {
 }
 
 const auto LocalHostEndpoint = ClientOptions()
-        .SetHost(           getEnvOrDefault("CLICKHOUSE_HOST",     "localhost"))
-        .SetPort(   getEnvOrDefault<size_t>("CLICKHOUSE_PORT",     "9000"))
-        .SetUser(           getEnvOrDefault("CLICKHOUSE_USER",     "default"))
-        .SetPassword(       getEnvOrDefault("CLICKHOUSE_PASSWORD", ""))
-        .SetDefaultDatabase(getEnvOrDefault("CLICKHOUSE_DB",       "default"));
+        .SetHost(           getEnvOrDefault("DATASTORE_HOST",     "localhost"))
+        .SetPort(   getEnvOrDefault<size_t>("DATASTORE_PORT",     "9000"))
+        .SetUser(           getEnvOrDefault("DATASTORE_USER",     "default"))
+        .SetPassword(       getEnvOrDefault("DATASTORE_PASSWORD", ""))
+        .SetDefaultDatabase(getEnvOrDefault("DATASTORE_DB",       "default"));
 
 INSTANTIATE_TEST_SUITE_P(
     Roundtrip, RoundtripCase,

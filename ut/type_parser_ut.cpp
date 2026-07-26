@@ -1,7 +1,7 @@
-#include <clickhouse/types/type_parser.h>
+#include <datastore/types/type_parser.h>
 #include <gtest/gtest.h>
 
-using namespace clickhouse;
+using namespace datastore;
 
 // TODO: add tests for Decimal column types.
 
@@ -30,7 +30,7 @@ TEST(TypeParserCase, ParseBool) {
 
     ASSERT_EQ(ast.meta, TypeAst::Terminal);
     ASSERT_EQ(ast.name, "Bool");
-#if !CH_MAP_BOOL_TO_UINT8
+#if !DS_MAP_BOOL_TO_UINT8
     ASSERT_EQ(ast.code, Type::Bool);
 #else
     ASSERT_EQ(ast.code, Type::UInt8);

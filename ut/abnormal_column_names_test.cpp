@@ -1,6 +1,6 @@
 
-#include <clickhouse/columns/column.h>
-#include <clickhouse/block.h>
+#include <datastore/columns/column.h>
+#include <datastore/block.h>
 
 #include "utils.h"
 
@@ -10,7 +10,7 @@
 #include <iostream>
 
 namespace {
-using namespace clickhouse;
+using namespace datastore;
 
 std::string getColumnNames(const Block& block) {
     std::string result;
@@ -39,7 +39,7 @@ protected:
         client_.reset();
     }
 
-    std::unique_ptr<clickhouse::Client> client_;
+    std::unique_ptr<datastore::Client> client_;
 };
 
 
@@ -66,11 +66,11 @@ TEST_P(AbnormalColumnNamesClientTest, Select) {
 INSTANTIATE_TEST_SUITE_P(ClientColumnNames, AbnormalColumnNamesClientTest,
     ::testing::Values(AbnormalColumnNamesClientTest::ParamType{
         ClientOptions()
-            .SetHost(           getEnvOrDefault("CLICKHOUSE_HOST",     "localhost"))
-            .SetPort(           getEnvOrDefault<size_t>("CLICKHOUSE_PORT",     "9000"))
-            .SetUser(           getEnvOrDefault("CLICKHOUSE_USER",     "default"))
-            .SetPassword(       getEnvOrDefault("CLICKHOUSE_PASSWORD", ""))
-            .SetDefaultDatabase(getEnvOrDefault("CLICKHOUSE_DB",       "default"))
+            .SetHost(           getEnvOrDefault("DATASTORE_HOST",     "localhost"))
+            .SetPort(           getEnvOrDefault<size_t>("DATASTORE_PORT",     "9000"))
+            .SetUser(           getEnvOrDefault("DATASTORE_USER",     "default"))
+            .SetPassword(       getEnvOrDefault("DATASTORE_PASSWORD", ""))
+            .SetDefaultDatabase(getEnvOrDefault("DATASTORE_DB",       "default"))
             .SetSendRetries(1)
             .SetPingBeforeQuery(true)
             .SetCompressionMethod(CompressionMethod::None),

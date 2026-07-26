@@ -9,7 +9,7 @@
 #include <openssl/ssl3.h>
 
 namespace {
-    using namespace clickhouse;
+    using namespace datastore;
 
     const auto QUERIES = std::vector<std::string> {
         "SELECT version()",
@@ -38,11 +38,11 @@ INSTANTIATE_TEST_SUITE_P(
     RemoteTLS, ReadonlyClientTest,
     ::testing::Values(ReadonlyClientTest::ParamType {
         ClientOptions()
-            .SetHost(           getEnvOrDefault("CLICKHOUSE_SECURE_HOST",     "play.clickhouse.com"))
-            .SetPort(   getEnvOrDefault<size_t>("CLICKHOUSE_SECURE_PORT",     "9440"))
-            .SetUser(           getEnvOrDefault("CLICKHOUSE_SECURE_USER",     "explorer"))
-            .SetPassword(       getEnvOrDefault("CLICKHOUSE_SECURE_PASSWORD", ""))
-            .SetDefaultDatabase(getEnvOrDefault("CLICKHOUSE_SECURE_DB",       "default"))
+            .SetHost(           getEnvOrDefault("DATASTORE_SECURE_HOST",     ""))
+            .SetPort(   getEnvOrDefault<size_t>("DATASTORE_SECURE_PORT",     "9440"))
+            .SetUser(           getEnvOrDefault("DATASTORE_SECURE_USER",     "explorer"))
+            .SetPassword(       getEnvOrDefault("DATASTORE_SECURE_PASSWORD", ""))
+            .SetDefaultDatabase(getEnvOrDefault("DATASTORE_SECURE_DB",       "default"))
             .SetSendRetries(1)
             .SetPingBeforeQuery(true)
             .SetCompressionMethod(CompressionMethod::None)
@@ -53,12 +53,12 @@ INSTANTIATE_TEST_SUITE_P(
 ));
 
 
-const auto ClickHouseExplorerConfig = ClientOptions()
-        .SetHost(           getEnvOrDefault("CLICKHOUSE_SECURE2_HOST",     "play.clickhouse.com"))
-        .SetPort(   getEnvOrDefault<size_t>("CLICKHOUSE_SECURE2_PORT",     "9440"))
-        .SetUser(           getEnvOrDefault("CLICKHOUSE_SECURE2_USER",     "explorer"))
-        .SetPassword(       getEnvOrDefault("CLICKHOUSE_SECURE2_PASSWORD", ""))
-        .SetDefaultDatabase(getEnvOrDefault("CLICKHOUSE_SECURE2_DB",       "default"))
+const auto DatastoreExplorerConfig = ClientOptions()
+        .SetHost(           getEnvOrDefault("DATASTORE_SECURE2_HOST",     ""))
+        .SetPort(   getEnvOrDefault<size_t>("DATASTORE_SECURE2_PORT",     "9440"))
+        .SetUser(           getEnvOrDefault("DATASTORE_SECURE2_USER",     "explorer"))
+        .SetPassword(       getEnvOrDefault("DATASTORE_SECURE2_PASSWORD", ""))
+        .SetDefaultDatabase(getEnvOrDefault("DATASTORE_SECURE2_DB",       "default"))
         .SetSendRetries(1)
         .SetPingBeforeQuery(true)
         .SetCompressionMethod(CompressionMethod::None);
@@ -67,7 +67,7 @@ const auto ClickHouseExplorerConfig = ClientOptions()
 INSTANTIATE_TEST_SUITE_P(
     Remote_GH_API_TLS, ReadonlyClientTest,
     ::testing::Values(ReadonlyClientTest::ParamType {
-        ClientOptions(ClickHouseExplorerConfig)
+        ClientOptions(DatastoreExplorerConfig)
             .SetSSLOptions(ClientOptions::SSLOptions()
                     .SetPathToCADirectory(DEFAULT_CA_DIRECTORY_PATH)),
         QUERIES
@@ -82,7 +82,7 @@ TEST(OpenSSLConfiguration, DISABLED_ValidValues) {
     // Verify that Client with valid configuration set via SetConfiguration is able to connect.
 
     EXPECT_NO_THROW(
-        Client(ClientOptions(ClickHouseExplorerConfig)
+        Client(ClientOptions(DatastoreExplorerConfig)
                 .SetSSLOptions(ClientOptions::SSLOptions()
                         .SetConfiguration({
                                 {"VerifyCAPath", DEFAULT_CA_DIRECTORY_PATH},
@@ -96,6 +96,9 @@ TEST(OpenSSLConfiguration, DISABLED_ValidValues) {
 #endif
 
 TEST(OpenSSLConfiguration, InValidValues) {
+    if (DatastoreExplorerConfig.host.empty())
+        GTEST_SKIP() << "No server configured: set DATASTORE_SECURE2_HOST.";
+
     // Verify that invalid options cause throwing exception.
     std::vector<ClientOptions::SSLOptions::CommandAndValue> configurations = {
         {"VerifyCAPath", std::nullopt},              // missing required value
@@ -115,7 +118,7 @@ TEST(OpenSSLConfiguration, InValidValues) {
     // server config but incorrect single Command-Value pair individually.
     for (const auto & cv : configurations) {
         EXPECT_ANY_THROW(
-            Client(ClientOptions(ClickHouseExplorerConfig)
+            Client(ClientOptions(DatastoreExplorerConfig)
                     .SetSSLOptions(ClientOptions::SSLOptions()
                             .SetConfiguration({cv})
             ));
@@ -127,7 +130,7 @@ TEST(OpenSSLConfiguration, InValidValues) {
 //INSTANTIATE_TEST_SUITE_P(
 //    Remote_GH_API_TLS_WithStringConfig, ReadonlyClientTest,
 //    ::testing::Values(ReadonlyClientTest::ParamType {
-//        ClientOptions(ClickHouseExplorerConfig)
+//        ClientOptions(DatastoreExplorerConfig)
 //            .SetSSLOptions(ClientOptions::SSLOptions()
 //                    .SetConfiguration({{"", DEFAULT_CA_DIRECTORY_PATH}})
 //        QUERIES
@@ -137,7 +140,7 @@ TEST(OpenSSLConfiguration, InValidValues) {
 INSTANTIATE_TEST_SUITE_P(
     Remote_GH_API_TLS_no_CA, ReadonlyClientTest,
     ::testing::Values(ReadonlyClientTest::ParamType {
-        ClientOptions(ClickHouseExplorerConfig)
+        ClientOptions(DatastoreExplorerConfig)
             .SetSSLOptions(ClientOptions::SSLOptions()
                      .SetUseDefaultCALocations(false)
                      .SetSkipVerification(true)), // No CA loaded, but verification is skipped
@@ -148,7 +151,7 @@ INSTANTIATE_TEST_SUITE_P(
 INSTANTIATE_TEST_SUITE_P(
     Remote_GH_API_TLS_no_CA, ConnectionFailedClientTest,
     ::testing::Values(ConnectionFailedClientTest::ParamType {
-        ClientOptions(ClickHouseExplorerConfig)
+        ClientOptions(DatastoreExplorerConfig)
             .SetSSLOptions(ClientOptions::SSLOptions()
                      .SetUseDefaultCALocations(false)),
         ExpectingException{"X509_v error: 20 unable to get local issuer certificate"}
@@ -158,7 +161,7 @@ INSTANTIATE_TEST_SUITE_P(
 INSTANTIATE_TEST_SUITE_P(
     Remote_GH_API_TLS_wrong_TLS_version, ConnectionFailedClientTest,
     ::testing::Values(ConnectionFailedClientTest::ParamType {
-        ClientOptions(ClickHouseExplorerConfig)
+        ClientOptions(DatastoreExplorerConfig)
             .SetSSLOptions(ClientOptions::SSLOptions()
                     .SetUseDefaultCALocations(false)
                     .SetMaxProtocolVersion(SSL3_VERSION)),

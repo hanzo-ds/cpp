@@ -1,19 +1,19 @@
-#include <clickhouse/columns/array.h>
-#include <clickhouse/columns/tuple.h>
-#include <clickhouse/columns/date.h>
-#include <clickhouse/columns/enum.h>
-#include <clickhouse/columns/factory.h>
-#include <clickhouse/columns/lowcardinality.h>
-#include <clickhouse/columns/nullable.h>
-#include <clickhouse/columns/numeric.h>
-#include <clickhouse/columns/map.h>
-#include <clickhouse/columns/string.h>
-#include <clickhouse/columns/uuid.h>
-#include <clickhouse/columns/ip4.h>
-#include <clickhouse/columns/ip6.h>
-#include <clickhouse/base/input.h>
-#include <clickhouse/base/output.h>
-#include <clickhouse/base/socket.h> // for ipv4-ipv6 platform-specific stuff
+#include <datastore/columns/array.h>
+#include <datastore/columns/tuple.h>
+#include <datastore/columns/date.h>
+#include <datastore/columns/enum.h>
+#include <datastore/columns/factory.h>
+#include <datastore/columns/lowcardinality.h>
+#include <datastore/columns/nullable.h>
+#include <datastore/columns/numeric.h>
+#include <datastore/columns/map.h>
+#include <datastore/columns/string.h>
+#include <datastore/columns/uuid.h>
+#include <datastore/columns/ip4.h>
+#include <datastore/columns/ip6.h>
+#include <datastore/base/input.h>
+#include <datastore/base/output.h>
+#include <datastore/base/socket.h> // for ipv4-ipv6 platform-specific stuff
 
 #include <gtest/gtest.h>
 #include "utils.h"
@@ -26,7 +26,7 @@
 
 namespace {
 
-using namespace clickhouse;
+using namespace datastore;
 using namespace std::literals::string_view_literals;
 
 static const auto LOWCARDINALITY_STRING_FOOBAR_10_ITEMS_BINARY =
@@ -978,7 +978,7 @@ TEST(ColumnsCase, ColumnLowCardinalityString_Load) {
     }
 }
 
-// This is temporary disabled since we are not 100% compatitable with ClickHouse
+// This is temporary disabled since we are not 100% compatitable with Datastore
 // on how we serailize LC columns, but we check interoperability in other tests (see client_ut.cpp)
 TEST(ColumnsCase, DISABLED_ColumnLowCardinalityString_Save) {
     const size_t items_count = 10;

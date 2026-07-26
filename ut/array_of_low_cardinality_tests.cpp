@@ -3,18 +3,18 @@
 #include <iterator>
 #include <vector>
 
-#include <clickhouse/columns/array.h>
-#include <clickhouse/columns/string.h>
-#include <clickhouse/columns/lowcardinality.h>
-#include "clickhouse/block.h"
-#include "clickhouse/client.h"
+#include <datastore/columns/array.h>
+#include <datastore/columns/string.h>
+#include <datastore/columns/lowcardinality.h>
+#include "datastore/block.h"
+#include "datastore/client.h"
 #include "utils.h"
-#include "clickhouse/base/buffer.h"
-#include "clickhouse/base/output.h"
+#include "datastore/base/buffer.h"
+#include "datastore/base/output.h"
 
 namespace
 {
-using namespace clickhouse;
+using namespace datastore;
 }
 
 std::shared_ptr<ColumnArray> buildTestColumn(const std::vector<std::vector<std::string>>& rows) {
@@ -40,8 +40,8 @@ TEST(ArrayOfLowCardinality, Serialization) {
     });
 
     // The serialization data was extracted from a successful insert.
-    // When compared to what Clickhouse/NativeWriter does for the same fields, the only differences are the index type and indexes.
-    // Since we are setting a different index type in clickhouse-cpp, it's expected to have different indexes.
+    // When compared to what Datastore/NativeWriter does for the same fields, the only differences are the index type and indexes.
+    // Since we are setting a different index type in datastore-cpp, it's expected to have different indexes.
     const std::vector<uint8_t> expectedSerialization {
         0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x02, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x61, 0x61,
@@ -61,11 +61,11 @@ TEST(ArrayOfLowCardinality, Serialization) {
 TEST(ArrayOfLowCardinality, InsertAndQuery) {
 
     const auto localHostEndpoint = ClientOptions()
-                                       .SetHost(           getEnvOrDefault("CLICKHOUSE_HOST",     "localhost"))
-                                       .SetPort(   getEnvOrDefault<size_t>("CLICKHOUSE_PORT",     "9000"))
-                                       .SetUser(           getEnvOrDefault("CLICKHOUSE_USER",     "default"))
-                                       .SetPassword(       getEnvOrDefault("CLICKHOUSE_PASSWORD", ""))
-                                       .SetDefaultDatabase(getEnvOrDefault("CLICKHOUSE_DB",       "default"));
+                                       .SetHost(           getEnvOrDefault("DATASTORE_HOST",     "localhost"))
+                                       .SetPort(   getEnvOrDefault<size_t>("DATASTORE_PORT",     "9000"))
+                                       .SetUser(           getEnvOrDefault("DATASTORE_USER",     "default"))
+                                       .SetPassword(       getEnvOrDefault("DATASTORE_PASSWORD", ""))
+                                       .SetDefaultDatabase(getEnvOrDefault("DATASTORE_DB",       "default"));
 
     Client client(ClientOptions(localHostEndpoint)
                       .SetPingBeforeQuery(true));

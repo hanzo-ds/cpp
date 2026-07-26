@@ -31,7 +31,7 @@ jobs:
       - uses: ilammy/msvc-dev-cmd@v1
 
       - name: Configure CMake
-        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCH_MAP_BOOL_TO_UINT8=OFF -DBUILD_TESTS=ON
+        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DDS_MAP_BOOL_TO_UINT8=OFF -DBUILD_TESTS=ON
 
       - name: Build
         run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
@@ -44,24 +44,24 @@ jobs:
               podman
               podman-compose
 
-      - name: Start ClickHouse Server
+      - name: Start Datastore Server
         shell: wsl-bash {0}
         run: |
-          echo "Starting ClickHouse container"
+          echo "Starting Datastore container"
           cd $(wslpath -u "${{ github.workspace }}/ci/")
           podman-compose up -d
 
-          echo "Waiting for ClickHouse to start..."
+          echo "Waiting for Datastore to start..."
           timeout 60s bash -c \
               'until curl -s -o /dev/null -w "%{http_code}" http://localhost:8123 | grep -q "200"; do sleep 2; done'
 
-          echo "Checking ClickHouse version"
+          echo "Checking Datastore version"
           curl -s http://localhost:8123/?query=SELECT%20VERSION%28%29
 
-      - name: Ping ClickHouse Server from Windows
+      - name: Ping Datastore Server from Windows
         run: |
             curl.exe http://localhost:8123/?query=SELECT%20VERSION%28%29
 
       - name: Test
         working-directory: ${{github.workspace}}/build/ut
-        run: Release\clickhouse-cpp-ut.exe "${{env.GTEST_FILTER}}"
+        run: Release\datastore-cpp-ut.exe "${{env.GTEST_FILTER}}"

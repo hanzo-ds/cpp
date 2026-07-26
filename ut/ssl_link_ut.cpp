@@ -1,10 +1,10 @@
-#include <clickhouse/base/sslsocket.h>
+#include <datastore/base/sslsocket.h>
 
 #include <gtest/gtest.h>
 
 // Link/compile guard for the TLS code path.
 //
-// A library-only `bazel build //:clickhouse` produces a static archive
+// A library-only `bazel build //:datastore` produces a static archive
 // and never runs the linker, so missing system libraries (on Windows,
 // the Win32 cert store `crypt32` and `user32` that OpenSSL needs) stay
 // invisible until a *consumer* links an executable that actually pulls
@@ -20,7 +20,7 @@
 // Only compiled when TLS is enabled (excluded for tls=no, where
 // sslsocket.cpp isn't part of the library); see ut/BUILD.bazel.
 TEST(SSLLink, ConstructContext) {
-    clickhouse::SSLParams params{};
-    clickhouse::SSLContext context(params);
+    datastore::SSLParams params{};
+    datastore::SSLContext context(params);
     SUCCEED();
 }

@@ -1,7 +1,7 @@
-#include <clickhouse/client.h>
-#include <clickhouse/error_codes.h>
-#include <clickhouse/types/type_parser.h>
-#include <clickhouse/base/socket.h>
+#include <datastore/client.h>
+#include <datastore/error_codes.h>
+#include <datastore/types/type_parser.h>
+#include <datastore/base/socket.h>
 
 #include <ut/utils.h>
 
@@ -14,7 +14,7 @@
 #   pragma warning(disable : 4996)
 #endif
 
-using namespace clickhouse;
+using namespace datastore;
 using namespace std;
 
 inline void PrintBlock(const Block& block) {
@@ -574,15 +574,15 @@ static void RunTests(Client& client) {
 int main() {
     try {
         const auto localHostEndpoint = ClientOptions()
-                .SetHost(   getEnvOrDefault("CLICKHOUSE_HOST",     "localhost"))
-                .SetPort(   getEnvOrDefault<size_t>("CLICKHOUSE_PORT",     "9000"))
+                .SetHost(   getEnvOrDefault("DATASTORE_HOST",     "localhost"))
+                .SetPort(   getEnvOrDefault<size_t>("DATASTORE_PORT",     "9000"))
                 .SetEndpoints({   {"asasdasd", 9000}
                                  ,{"localhost"}
                                  ,{"noalocalhost", 9000}
                                })
-                .SetUser(           getEnvOrDefault("CLICKHOUSE_USER",     "default"))
-                .SetPassword(       getEnvOrDefault("CLICKHOUSE_PASSWORD", ""))
-                .SetDefaultDatabase(getEnvOrDefault("CLICKHOUSE_DB",       "default"));
+                .SetUser(           getEnvOrDefault("DATASTORE_USER",     "default"))
+                .SetPassword(       getEnvOrDefault("DATASTORE_PASSWORD", ""))
+                .SetDefaultDatabase(getEnvOrDefault("DATASTORE_DB",       "default"));
 
         {
             Client client(ClientOptions(localHostEndpoint)

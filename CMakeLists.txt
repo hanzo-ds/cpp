@@ -21,18 +21,18 @@ OPTION (WITH_SYSTEM_ZSTD "Use system ZSTD" OFF)
 OPTION (DEBUG_DEPENDENCIES "Print debug info about dependencies duting build" ON)
 OPTION (CHECK_VERSION "Check that version number corresponds to git tag, usefull in CI/CD to validate that new version published on GitHub has same version in sources" OFF)
 OPTION (DISABLE_CLANG_LIBC_WORKAROUND "Disable linking compiler-rt & gcc_s if using clang & libstdc++" OFF)
-OPTION (CH_MAP_BOOL_TO_UINT8 "Map ClickHouse Bool type to UInt8 instead of exposing a distinct Bool API." ON)
+OPTION (DS_MAP_BOOL_TO_UINT8 "Map Datastore Bool type to UInt8 instead of exposing a distinct Bool API." ON)
 
-PROJECT (CLICKHOUSE-CLIENT
-    VERSION "${CLICKHOUSE_CPP_VERSION}"
-    DESCRIPTION "ClickHouse C++ client library"
+PROJECT (DATASTORE-CLIENT
+    VERSION "${DATASTORE_CPP_VERSION}"
+    DESCRIPTION "Datastore C++ client library"
 )
 
 USE_CXX17 ()
 USE_OPENSSL ()
 
 IF (CHECK_VERSION)
-    clickhouse_cpp_check_library_version(FATAL_ERROR)
+    datastore_cpp_check_library_version(FATAL_ERROR)
 ENDIF ()
 
 IF (NOT CMAKE_BUILD_TYPE)
@@ -107,7 +107,7 @@ ELSE ()
 ENDIF ()
 
 SUBDIRS (
-    clickhouse
+    datastore
 )
 
 IF (BUILD_BENCHMARK)
@@ -136,7 +136,7 @@ if(DEBUG_DEPENDENCIES)
         # so have to create a target to fetch that info at generate time.
         string(REPLACE ":" "_" target_plain_name ${target})
         add_custom_target(${target_plain_name}_print_debug_info COMMAND ${CMAKE_COMMAND} -E echo "${target} : $<TARGET_FILE:${target}>")
-        add_dependencies(clickhouse-cpp-lib ${target_plain_name}_print_debug_info)
+        add_dependencies(datastore-cpp-lib ${target_plain_name}_print_debug_info)
     endfunction()
 
     function(print_target_debug_info target)

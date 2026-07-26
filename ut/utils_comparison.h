@@ -2,7 +2,7 @@
 
 #include "utils_meta.h"
 
-#include <clickhouse/base/socket.h> // for ipv4-ipv6 platform-specific stuff
+#include <datastore/base/socket.h> // for ipv4-ipv6 platform-specific stuff
 
 #include <gtest/gtest.h>
 
@@ -11,7 +11,7 @@
 #include <cmath>
 #include <type_traits>
 
-namespace clickhouse {
+namespace datastore {
     class Block;
     class Column;
 
@@ -107,14 +107,14 @@ struct ColumnAsContainerWrapper {
     }
 };
 
-// Helper to allow comparing values of two instances of clickhouse::Column, when concrete type is unknown.
+// Helper to allow comparing values of two instances of datastore::Column, when concrete type is unknown.
 // Comparison is done by comparing result of Column::GetItem().
 template <>
-struct ColumnAsContainerWrapper<clickhouse::Column> {
-    const clickhouse::Column& nested_col;
+struct ColumnAsContainerWrapper<datastore::Column> {
+    const datastore::Column& nested_col;
 
     struct Iterator {
-        const clickhouse::Column& nested_col;
+        const datastore::Column& nested_col;
         size_t i = 0;
 
         auto& operator++() {
@@ -123,7 +123,7 @@ struct ColumnAsContainerWrapper<clickhouse::Column> {
         }
 
         struct ItemWrapper {
-            const clickhouse::ItemView item_view;
+            const datastore::ItemView item_view;
 
             bool operator==(const ItemWrapper & other) const {
                 // type-erased comparison, byte-by-byte
@@ -176,7 +176,7 @@ struct ColumnAsContainerWrapper<clickhouse::Column> {
 
 template <typename T>
 auto maybeWrapColumnAsContainer(const T & t) {
-    if constexpr (std::is_base_of_v<clickhouse::Column, T>) {
+    if constexpr (std::is_base_of_v<datastore::Column, T>) {
         return ::details::ColumnAsContainerWrapper<T>{t};
     } else {
         return t;
@@ -216,8 +216,8 @@ template <typename Left, typename Right>
     using R = std::decay_t<Right>;
 
     if constexpr (!is_string_v<L> && !is_string_v<R>
-            && (is_container_v<L> || std::is_base_of_v<clickhouse::Column, L>)
-            && (is_container_v<R> || std::is_base_of_v<clickhouse::Column, R>) ) {
+            && (is_container_v<L> || std::is_base_of_v<datastore::Column, L>)
+            && (is_container_v<R> || std::is_base_of_v<datastore::Column, R>) ) {
 
         const auto & l = maybeWrapColumnAsContainer(left);
         const auto & r = maybeWrapColumnAsContainer(right);

@@ -19,17 +19,17 @@ function (regex_extract_matching_groups INPUT REGEX_STR)
 endfunction ()
 
 
-function(clickhouse_cpp_get_version)
-    # Extract all components of the version from the clickhouse/version.h
+function(datastore_cpp_get_version)
+    # Extract all components of the version from the datastore/version.h
 
-    file(READ ${CMAKE_CURRENT_SOURCE_DIR}/clickhouse/version.h VERSION_FILE_DATA)
+    file(READ ${CMAKE_CURRENT_SOURCE_DIR}/datastore/version.h VERSION_FILE_DATA)
 
     foreach (VERSION_COMPONENT
             IN ITEMS
-            CLICKHOUSE_CPP_VERSION_MAJOR
-            CLICKHOUSE_CPP_VERSION_MINOR
-            CLICKHOUSE_CPP_VERSION_PATCH
-            CLICKHOUSE_CPP_VERSION_BUILD)
+            DATASTORE_CPP_VERSION_MAJOR
+            DATASTORE_CPP_VERSION_MINOR
+            DATASTORE_CPP_VERSION_PATCH
+            DATASTORE_CPP_VERSION_BUILD)
 
         regex_extract_matching_groups(
             "${VERSION_FILE_DATA}"
@@ -39,12 +39,12 @@ function(clickhouse_cpp_get_version)
         set ("${VERSION_COMPONENT}" "${${VERSION_COMPONENT}}" PARENT_SCOPE)
     endforeach ()
 
-    set(CLICKHOUSE_CPP_VERSION "${CLICKHOUSE_CPP_VERSION_MAJOR}.${CLICKHOUSE_CPP_VERSION_MINOR}.${CLICKHOUSE_CPP_VERSION_PATCH}" PARENT_SCOPE)
+    set(DATASTORE_CPP_VERSION "${DATASTORE_CPP_VERSION_MAJOR}.${DATASTORE_CPP_VERSION_MINOR}.${DATASTORE_CPP_VERSION_PATCH}" PARENT_SCOPE)
 endfunction()
 
-clickhouse_cpp_get_version()
+datastore_cpp_get_version()
 
-function(clickhouse_cpp_check_library_version CHECK_MODE)
+function(datastore_cpp_check_library_version CHECK_MODE)
 ## Verify that current tag matches the version
 
     find_program (GIT git)
@@ -62,7 +62,7 @@ function(clickhouse_cpp_check_library_version CHECK_MODE)
             VERSION_FROM_GIT_DESCRIBE_MAJOR
             VERSION_FROM_GIT_DESCRIBE_MINOR
             VERSION_FROM_GIT_DESCRIBE_PATCH
-            CLICKHOUSE_CPP_VERSION_COMMIT
+            DATASTORE_CPP_VERSION_COMMIT
         )
 
         if (NOT (VERSION_FROM_GIT_DESCRIBE_MAJOR AND VERSION_FROM_GIT_DESCRIBE_MINOR AND VERSION_FROM_GIT_DESCRIBE_PATCH))
@@ -70,18 +70,18 @@ function(clickhouse_cpp_check_library_version CHECK_MODE)
             return ()
         endif ()
 
-      set (EXPECTED_CLICKHOUSE_CPP_VERSION "${VERSION_FROM_GIT_DESCRIBE_MAJOR}.${VERSION_FROM_GIT_DESCRIBE_MINOR}.${VERSION_FROM_GIT_DESCRIBE_PATCH}")
-      if (NOT "${EXPECTED_CLICKHOUSE_CPP_VERSION}" STREQUAL ${CLICKHOUSE_CPP_VERSION})
-          message(${CHECK_MODE} "update CLICKHOUSE_CPP_VERSION_ values in version.h.\n"
+      set (EXPECTED_DATASTORE_CPP_VERSION "${VERSION_FROM_GIT_DESCRIBE_MAJOR}.${VERSION_FROM_GIT_DESCRIBE_MINOR}.${VERSION_FROM_GIT_DESCRIBE_PATCH}")
+      if (NOT "${EXPECTED_DATASTORE_CPP_VERSION}" STREQUAL ${DATASTORE_CPP_VERSION})
+          message(${CHECK_MODE} "update DATASTORE_CPP_VERSION_ values in version.h.\n"
 "git reports version as \"${GIT_DESCRIBE_DATA}\","
-" hence expecting version to be ${EXPECTED_CLICKHOUSE_CPP_VERSION}, "
-" instead got ${CLICKHOUSE_CPP_VERSION}")
+" hence expecting version to be ${EXPECTED_DATASTORE_CPP_VERSION}, "
+" instead got ${DATASTORE_CPP_VERSION}")
       endif ()
     else ()
       message (${CHECK_MODE} "git is not found, can't verify library version")
     endif ()
 
-    message("Version check passed: ${CLICKHOUSE_CPP_VERSION}")
+    message("Version check passed: ${DATASTORE_CPP_VERSION}")
 endfunction()
 
-# clickhouse_cpp_check_library_version()
+# datastore_cpp_check_library_version()
